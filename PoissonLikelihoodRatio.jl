@@ -106,7 +106,7 @@ function likelihoodRatio(mu::Float64, bkg::Float64, cfdent_level::Float64, n0_up
 end
 
 function selectMuRegion(mu_list::Array, n0_limit_list::Array)
-    #=
+    #=c
     This function gives the mu interval with dictionary structure.
     NOTICE: This function naturely select the topmost mu_2 of a fixed n_0, since it would overwrite the keys(n_0).
     =#
