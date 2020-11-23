@@ -1,5 +1,5 @@
 module Tools
-export scanBKGGif
+export scanBKGGif, getMuBkgPlot
 
 push!(LOAD_PATH, ".")
 using PoissonLikelihoodRatio
@@ -38,16 +38,27 @@ function showSortedResult(mu, bkg, n0_upper::Int = 30)
     end
 end
 
-function getMuBkgPlot(start_point::Float32, end_point::Float32, cfdent_level)
+function getMuBkgPlot(start_point::Float64, end_point::Float64, cfdent_level)
     # Return a 2 by x array to get mu_2 against bkg plot.
-    bkg_scan = start_point:0.01:end_point
-    upper_mu_for_0 = ones(length(bkg_scan))
-    for i in 1:length(bkg_scan)
-        n0_limit_list = constructBelt(bkg_scan[i], cfdent_level)
-        upper_mu_dict = selectMuRegion(mu_list, n0_limit_list)
-        upper_mu_for_0[i] = upper_mu_dict[15]
+    # after
+    mu_list = 0:0.005:50
+    bkg_scan = start_point:0.1:end_point
+    upper_mu_for_ = Dict{Int, Array}()
+
+    # initialize data structure.
+    for i in 0:10
+        upper_mu_for_[i] = ones(length(bkg_scan))
     end
-    return [bkg_scan, upper_mu_for_0]
+    # end of initialization.
+    for i in 1:length(bkg_scan)
+        n0_limit_list = constructBelt(bkg_scan[i], cfdent_level) # get constructBelt for a fixed bkg.
+        upper_mu_dict = selectMuRegion(mu_list, n0_limit_list) # get mu_2 for each of n0.
+        # fill each upper mu corresponding to a n0 with a fixed b.
+        for j in 0:10
+            upper_mu_for_[j][i] = upper_mu_dict[j]
+        end
+    end
+    return bkg_scan, upper_mu_for_
 end
 
 
