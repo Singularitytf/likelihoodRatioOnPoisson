@@ -105,7 +105,7 @@ function likelihoodRatio(mu::Float64, bkg::Float64, cfdent_level::Float64, n0_up
     end
 end
 
-function selectMuRegion(mu_list, n0_limit_list)
+function selectMuRegion(mu_list::Array, n0_limit_list::Array)
     #=
     This function gives the mu interval with dictionary structure.
     NOTICE: This function naturely select the topmost mu_2 of a fixed n_0, since it would overwrite the keys(n_0).
@@ -121,7 +121,7 @@ function selectMuRegion(mu_list, n0_limit_list)
     return n0_upper_mu_dic
 end
 
-function constructBelt(bkg::Float64, cfdent_level::Float64=0.9, n0_upper::Int=100, mu_upper_limit::Float64=50.0)
+function constructBelt(bkg::Float64, mu_list::Array, cfdent_level::Float64=0.9, n0_upper::Int=100)
     #=
     This function construct the confident belt with a certainty CL by scanning the parameter(mu) space.
     n0_upper -> scan limit for n0.
@@ -129,7 +129,7 @@ function constructBelt(bkg::Float64, cfdent_level::Float64=0.9, n0_upper::Int=10
     RETURN: a 2 by len(mu_list) ARRAY.
     =#
     # Scan for the whole mu parameter space.
-    mu_list = 0:0.005:mu_upper_limit
+    # mu_list = 0:0.005:mu_upper_limit
     length_of_list = length(mu_list)
     n0_limit_list = ones(length_of_list, 2)
     for i in 1:length_of_list
