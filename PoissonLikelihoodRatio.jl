@@ -1,62 +1,25 @@
+#=
+The algorthim is form PHYSICAL REVIEW D Unified approach to the classical statistical analysis of small signals.
+=#
+
+
 module PoissonLikelihoodRatio
-export likelihoodRatio, selectMuRegion, showSortedResult
+export PoissonBKGObj, likelihoodRatio, selectMuRegion, getSortedRatio, showSortedResult, constructBelt
 
 using Distributions
-using GR
 
-
-function poissonbkg(mu::Float64, bkg::Float64)
-    #=
-    Return poisson distribution(a distribution object) with background.
-    lambda is poisson parameter.
-    bkg is background. And lambda + bkg as the parameter of in-build poisson distribution by Julia Distributions.
-    =#
-    poisson_para = mu + bkg
-    return Poisson(poisson_para)
+struct PoissonBKGObj
+    # Construct a object for the following analysis
+    mu::Float64
+    bkg::Float64
+    cfdent_level::Float64
 end
 
-function searchIntervalEdge(func, cfdentLevel::Float64)
-    """
-    Our search way is find interval confident level.
-    """
-    # Initialize Parameters
-    alpha = 1 - cfdentLevel
-    upper_limit::UInt16 = 0
-    lower_limit::UInt16 = 0
-    upper_n0 = 25 # Change this parameter!!!
-    is_upper = true # If we find upper limit, these two parameters would help iteration not update the upper(or lower)_limit value and help us check whether it update or not.
-    is_lower = true
-    # Search for upper and lower limit.
-    for n0 in 0:upper_n0
-        cdf_temp = cdf(func, n0)
-        if (cdf_temp >= alpha/2) & is_upper
-            upper_limit = n0
-            is_upper = false
-        end
-        if (cdf_temp >= (1 - alpha/2)) & is_lower
-            lower_limit = n0
-            is_lower = false
-        end
-    end
-    # Note here!!!
-    return [upper_limit, lower_limit]
-end
-
-function searchUpperEdge(func, cfdent_level::Float64)
-    alpha = 1 - cfdent_level
-    upper_limit::UInt16 = 0
-    upper_n0 = 20 # Change this parameter!!!
-    for n0 in 0:upper_n0
-        cdf_temp = cdf(func, n0)
-        if cdf_temp >= alpha
-            upper_limit = n0
-            break
-        end
-    end
-    return upper_limit
-end
 
 function getMuBest(n0::Int, bkg::Float64)
+    #=
+    This function will not be exported. No need to input a object
+    =#
     if (n0 - bkg) >= 0
         mu_best = n0 - bkg
     else
@@ -65,20 +28,30 @@ function getMuBest(n0::Int, bkg::Float64)
     return mu_best
 end
 
+# function likelihoodRatio(mu::Int, bkg::Float64, n0::Int)
+#     #=
+#     This function will not be exported. No need to input a object
+#     =#
+#     mu_best = getMuBest(n0, bkg)
+#     return ((mu+bkg) / (mu_best+bkg))^n0 * exp(mu_best - mu)
+# end
+
 function getSortedRatio(mu, bkg, n0_upper, check::Bool = false)
+    # A sub-purcess of likelihoodRatio.
     #=
     for each n0:
-    1. Scan for mu_best.
+    1. Get mu_best for each n0.
     2. Compute p(n0|mu) and p(n0|mu_best).
     3. Compute likehood ratio, and save it as a list.
     4. Arrange the list, and take first # n for building confident interval.
     =#
     # For convinience of checking data, we could return p(n0|mu) and p(n0|mu_best) list.
     if check == false
-        ratio_list = ones(n0_upper+1)
+        ratio_list = ones(n0_upper+1) # Since n0 counts form 0 to n0_upper.
         for n0 in 0:n0_upper
             mu_best = getMuBest(n0, bkg)
             ratio_list[n0+1] = pdf(Poisson(mu + bkg), n0)/pdf(Poisson(mu_best + bkg), n0)
+            # ratio_list[n0+1] = likelihoodRatio(mu, bkg, n0)
         end
         sorted_index_rank = sortperm(ratio_list, rev = true) # Due to index start form 1, while the n0 start form 0, there exists one difference between index and n0, i.e. n0 = index - 1.
         return sorted_index_rank
@@ -98,50 +71,29 @@ function getSortedRatio(mu, bkg, n0_upper, check::Bool = false)
     end
 end
 
-function showSortedResult(mu, bkg, n0_upper)
-    # Input teturn from getSortedRatio function.
-    hypo_mu_list, hypo_mu_best_list, ratio_list, rank = getSortedRatio(mu, bkg, n0_upper, true)
-    println("n0", "\t", "hypo_mu", "\t", "hypo_mu_best", "\t", "ratio", "\t", "rank")
-    for i in 1:length(rank)
-        println(i-1, "\t",hypo_mu_list[i], "\t",hypo_mu_best_list[i], "\t",ratio_list[i], "\t",rank[i])
-    end
-end
 
 function selectN0(mu, bkg, index_sorted_list, cfdent_level)
+    # A sub-purcess of likelihoodRatio.
     # Select upper and lower n0 for each mu with A confident level.
     sum_of_hypo::Float64 = 0.0
     selected_n0 = []
-    for i in 0:n0_upper
-       if sum_of_hypo < cfdent_level
-        sum_of_hypo = pdf(Poisson(mu + bkg), index_sorted_list[i+1] - 1) + sum_of_hypo
-        push!(selected_n0, index_sorted_list[i+1] - 1)
-        # print(sum_of_hypo, "\n") # This is for testing the part is work well or not.
-       else
-        break
-       end
+    n0_upper = length(index_sorted_list) - 1
+    i::Int8 = 0
+    while sum_of_hypo < cfdent_level
+        sum_of_hypo += pdf(Poisson(mu + bkg), index_sorted_list[i+1]-1)
+        push!(selected_n0, index_sorted_list[i+1]-1)
+        i += 1
     end
-    # Select upper and lower limit.
-    n0_upper_limit = maximum(selected_n0)
-    n0_lower_limit = minimum(selected_n0)
+    return selected_n0
 end
 
 # Likelihood ratio method
-function likelihoodRatio(mu, bkg, cfdent_level::Float64 = 0.99, n0_upper::Integer = 60, probability = false)
+function likelihoodRatio(mu::Float64, bkg::Float64, cfdent_level::Float64, n0_upper::Integer = 100, probability::Bool = false)
     index_sorted_list = getSortedRatio(mu, bkg, n0_upper)
     # println(index_sorted_list)
     # Adding all the p(n0|mu) at arrange with sorted index, until it reached confident level we need.
     # The following twe parameters are created for outputing the information we may want to see later.
-    sum_of_hypo = 0.0
-    selected_n0 = []
-    for i in 0:n0_upper
-       if sum_of_hypo < cfdent_level
-        sum_of_hypo = pdf(Poisson(mu + bkg), index_sorted_list[i+1] - 1) + sum_of_hypo
-        push!(selected_n0, index_sorted_list[i+1] - 1)
-        # print(sum_of_hypo, "\n") # This is for testing the part is work well or not.
-       else
-        break
-       end
-    end
+    selected_n0 = selectN0(mu, bkg, index_sorted_list, cfdent_level)
     # Select upper and lower limit.
     n0_upper_limit = maximum(selected_n0)
     n0_lower_limit = minimum(selected_n0)
@@ -156,6 +108,7 @@ end
 function selectMuRegion(mu_list, n0_limit_list)
     #=
     This function gives the mu interval with dictionary structure.
+    NOTICE: This function naturely select the topmost mu_2 of a fixed n_0, since it would overwrite the keys(n_0).
     =#
     temp::Int = 0
     length_of_length::Int = length(mu_list)
@@ -168,7 +121,25 @@ function selectMuRegion(mu_list, n0_limit_list)
     return n0_upper_mu_dic
 end
 
-# length_of_list = 10000 # parameter used in [S0556-2821(98)00109-X] is 10,000.
+function constructBelt(bkg::Float64, cfdent_level::Float64=0.9, n0_upper::Int=100, mu_upper_limit::Float64=50.0)
+    #=
+    This function construct the confident belt with a certainty CL by scanning the parameter(mu) space.
+    n0_upper -> scan limit for n0.
+    mu_upper_limit -> scan limit for mu.
+    RETURN: a 2 by len(mu_list) ARRAY.
+    =#
+    # Scan for the whole mu parameter space.
+    mu_list = 0:0.005:mu_upper_limit
+    length_of_list = length(mu_list)
+    n0_limit_list = ones(length_of_list, 2)
+    for i in 1:length_of_list
+        n0_limit_list[i, :] = likelihoodRatio(mu_list[i], bkg, cfdent_level, n0_upper)
+    end
+    return n0_limit_list
+end
+
+
+    # length_of_list = 10000 # parameter used in [S0556-2821(98)00109-X] is 10,000.
 # mu_upper_limit = 60
 # bkg = 5.0
 # cfdent_level = 0.9
