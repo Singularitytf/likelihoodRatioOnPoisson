@@ -1,6 +1,7 @@
 push!(LOAD_PATH, ".")
-using PoissonLikelihoodRatio, Tools # Top level packages
+using PoissonLikelihoodRatio, Tools, MildPathology # Top level packages
 using Plots
+using JLD
 # using GR
 
 mu_list = 0:0.005:50
@@ -20,27 +21,34 @@ dict_test = selectMuRegion(mu_list, n0_limit_list)
 # plot(n0_limit_list[:,1], mu_list, n0_limit_list[:,2], mu_list, xlim = [0,15], ylim = [0,15]) # for GR
 
 # plot uppper limit for n = 0
-bkg_scan = 0:0.01:25
-upper_mu_for_0 = ones(length(bkg_scan))
-upper_mu_for_1 = ones(length(bkg_scan))
-upper_mu_for_2 = ones(length(bkg_scan))
-upper_mu_for_3 = ones(length(bkg_scan))
-upper_mu_for_4 = ones(length(bkg_scan))
-for i in 1:length(bkg_scan)
-    n0_limit_list = constructBelt(bkg_scan[i])
-    upper_mu_dict = selectMuRegion(mu_list, n0_limit_list)
-    upper_mu_for_0[i] = upper_mu_dict[0]
-    upper_mu_for_1[i] = upper_mu_dict[1]
-    upper_mu_for_2[i] = upper_mu_dict[2]
-    upper_mu_for_3[i] = upper_mu_dict[3]
-    upper_mu_for_4[i] = upper_mu_dict[4]
+# bkg_scan = 0:0.01:25
+# upper_mu_for_0 = ones(length(bkg_scan))
+# upper_mu_for_1 = ones(length(bkg_scan))
+# upper_mu_for_2 = ones(length(bkg_scan))
+# upper_mu_for_3 = ones(length(bkg_scan))
+# upper_mu_for_4 = ones(length(bkg_scan))
+# for i in 1:length(bkg_scan)
+#     n0_limit_list = constructBelt(bkg_scan[i])
+#     upper_mu_dict = selectMuRegion(mu_list, n0_limit_list)
+#     upper_mu_for_0[i] = upper_mu_dict[0]
+#     upper_mu_for_1[i] = upper_mu_dict[1]
+#     upper_mu_for_2[i] = upper_mu_dict[2]
+#     upper_mu_for_3[i] = upper_mu_dict[3]
+#     upper_mu_for_4[i] = upper_mu_dict[4]
+# end
+# fig = plot(bkg_scan, upper_mu_for_0)
+# plot!(bkg_scan, upper_mu_for_1)
+# plot!(bkg_scan, upper_mu_for_2)
+# plot!(bkg_scan, upper_mu_for_3)
+# plot!(bkg_scan, upper_mu_for_4)
+# savefig(fig, "mu2_bkg.png")
+bkg_scan = 0:0.001:20
+mu_list = 0:0.005:50
+a = getMu2ofBkg(bkg_scan, 0.9)
+for i in 0:10
+    dic["$(i)"] = a[i]
 end
-fig = plot(bkg_scan, upper_mu_for_0)
-plot!(bkg_scan, upper_mu_for_1)
-plot!(bkg_scan, upper_mu_for_2)
-plot!(bkg_scan, upper_mu_for_3)
-plot!(bkg_scan, upper_mu_for_4)
-savefig(fig, "mu2_bkg.png")
+save("mu_bkg_dict.jld", dic)
 
 
 # showSortedResult(0.9800, 5.0, 60)
