@@ -1,12 +1,14 @@
 module MildPathology
 export getMu2ofBkg, getStepIndex
+push!(LOAD_PATH, ".")
 using PoissonLikelihoodRatio
+using Distributed
 
 
-function getMu2ofBkg(bkg_scan, cfdent_level)
+function getMu2ofBkg(bkg_scan, mu_list, cfdent_level)
     # Return a 2 by x array to get mu_2 against bkg plot.
     # after
-    mu_list = 0:0.005:50
+    # mu_list = 0:0.005:50
     upper_mu_for_ = Dict{Int, Array}()
 
     # initialize data structure.
@@ -15,7 +17,7 @@ function getMu2ofBkg(bkg_scan, cfdent_level)
     end
     # end of initialization.
     for i in 1:length(bkg_scan)
-        n0_limit_list = constructBelt(bkg_scan[i], cfdent_level) # get constructBelt for a fixed bkg.
+        n0_limit_list = constructBelt(bkg_scan[i], mu_list, cfdent_level) # get constructBelt for a fixed bkg.
         upper_mu_dict = selectMuRegion(mu_list, n0_limit_list) # get mu_2 for each of n0.
         # fill each upper mu corresponding to a n0 with a fixed b.
         for j in 0:10

@@ -4,15 +4,17 @@ The algorthim is form PHYSICAL REVIEW D Unified approach to the classical statis
 
 
 module PoissonLikelihoodRatio
-export PoissonBKGObj, likelihoodRatio, selectMuRegion, getSortedRatio, showSortedResult, constructBelt
-
+export likelihoodRatio, selectMuRegion, getSortedRatio, showSortedResult, constructBelt
 using Distributions
 
-struct PoissonBKGObj
-    # Construct a object for the following analysis
-    mu::Float64
-    bkg::Float64
-    cfdent_level::Float64
+
+function log_poisson(mu, n0)
+    sum_ = sum(log.(1:n0))
+    return n0 * log(mu) - mu - sum_
+end
+
+function poisson_pdf(mu, n0)
+    return exp(log_poisson(mu, n0))
 end
 
 
@@ -61,8 +63,8 @@ function getSortedRatio(mu, bkg, n0_upper, check::Bool = false)
         hypo_mu_best_list = ones(n0_upper+1)
         for n0 in 0:n0_upper
             mu_best = getMuBest(n0, bkg)
-            hypo_mu_list[n0+1] = pdf(Poisson(mu + bkg), n0)
-            hypo_mu_best_list[n0+1] = pdf(Poisson(mu_best + bkg), n0)
+            hypo_mu_list[n0+1] = poisson_pdf(mu + bkg, n0)
+            hypo_mu_best_list[n0+1] = poisson_pdf(mu_best + bkg, n0)
             ratio_list[n0+1] = hypo_mu_list[n0+1]/hypo_mu_best_list[n0+1]
         end
         sorted_index_rank = sortperm(ratio_list, rev = true) # Due to index start form 1, while the n0 start form 0, there exists one difference between index and n0, i.e. n0 = index - 1.
@@ -105,7 +107,7 @@ function likelihoodRatio(mu::Float64, bkg::Float64, cfdent_level::Float64, n0_up
     end
 end
 
-function selectMuRegion(mu_list::Array, n0_limit_list::Array)
+function selectMuRegion(mu_list, n0_limit_list)
     #=
     This function gives the mu interval with dictionary structure.
     NOTICE: This function naturely select the topmost mu_2 of a fixed n_0, since it would overwrite the keys(n_0).
@@ -121,7 +123,7 @@ function selectMuRegion(mu_list::Array, n0_limit_list::Array)
     return n0_upper_mu_dic
 end
 
-function constructBelt(bkg::Float64, mu_list::Array, cfdent_level::Float64=0.9, n0_upper::Int=100)
+function constructBelt(bkg::Float64, mu_list, cfdent_level::Float64=0.9, n0_upper::Int=100)
     #=
     This function construct the confident belt with a certainty CL by scanning the parameter(mu) space.
     n0_upper -> scan limit for n0.
