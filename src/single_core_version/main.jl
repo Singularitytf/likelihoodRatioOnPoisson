@@ -41,7 +41,7 @@ using Plots, JLD
 # plot!(bkg_scan, upper_mu_for_3)
 # plot!(bkg_scan, upper_mu_for_4)
 # savefig(fig, "mu2_bkg.png")
-bkg_scan = 0:0.1:20
+bkg_scan = 0:0.01:20
 mu_list = 0:0.005:50
 dic = Dict()
 a = getMu2ofBkg(bkg_scan, mu_list, 0.9)
@@ -49,6 +49,7 @@ for i in 0:10
     dic["$(i)"] = a[i]
 end
 save("mu_bkg_dict_.jld", dic)
+plot(bkg_scan ,a[0])
 
 
 # showSortedResult(0.9800, 5.0, 60)
