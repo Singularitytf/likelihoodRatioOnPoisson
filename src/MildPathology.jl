@@ -1,7 +1,7 @@
 module MildPathology
 export getMu2ofBkg, getStepIndex
 push!(LOAD_PATH, ".")
-using PoissonLikelihoodRatio
+using HighPerformenceLHR
 using Distributed
 
 

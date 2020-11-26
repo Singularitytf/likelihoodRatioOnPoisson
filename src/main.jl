@@ -1,18 +1,17 @@
 push!(LOAD_PATH, ".")
-using PoissonLikelihoodRatio, Tools, MildPathology # Top level packages
-using Plots
-using JLD
+using MildPathology # Top level packages
+using Plots, JLD
 # using GR
 
-mu_list = 0:0.005:50
-n0_limit_list = constructBelt(2.5)
+# mu_list = 0:0.005:50
+# n0_limit_list = constructBelt(2.5, mu_list)
 
 
 # scanBKGGif(2,4)
 # bkgScanGif(4,6)
 # bkgScanGif(20,22)
 
-dict_test = selectMuRegion(mu_list, n0_limit_list)
+# dict_test = selectMuRegion(mu_list, n0_limit_list)
 
 # for i in 0:30
 #     println(i, "\t",dict_test[i])
@@ -42,13 +41,14 @@ dict_test = selectMuRegion(mu_list, n0_limit_list)
 # plot!(bkg_scan, upper_mu_for_3)
 # plot!(bkg_scan, upper_mu_for_4)
 # savefig(fig, "mu2_bkg.png")
-bkg_scan = 0:0.001:20
+bkg_scan = 0:0.1:20
 mu_list = 0:0.005:50
-a = getMu2ofBkg(bkg_scan, 0.9)
+dic = Dict()
+a = getMu2ofBkg(bkg_scan, mu_list, 0.9)
 for i in 0:10
     dic["$(i)"] = a[i]
 end
-save("mu_bkg_dict.jld", dic)
+save("mu_bkg_dict_.jld", dic)
 
 
 # showSortedResult(0.9800, 5.0, 60)
