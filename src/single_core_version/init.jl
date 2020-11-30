@@ -5,15 +5,24 @@
 push!(LOAD_PATH, ".")
 using MildPathology # Top level packages
 using Plots, JLD
-print("Please wait for a while, it may take a long time...")
+println("Please wait for a while, it may take several hours...")
 bkg_upper_limit = 20
 mu_upper_limit = 50
-bkg_scan = 0:0.001:20
-mu_list = 0:0.005:50
-dic = Dict{String, Array}()
-temp = getMu2ofBkg(bkg_scan, mu_list, 0.9)
+bkg_precision = 0.001
+bkg_scan = 0:bkg_precision:25
+mu_list = 0:0.01:50
+CL = 0.9
+nrange = (0, 10)
+mu2 = Dict{String, Array}()
+mu1 = Dict{String, Array}()
+upper_dic, lower_dic = getMuofBkg(bkg_scan, mu_list, CL, nrange = (0, 10))
 # re-assign key for storing!! Since JLD need keys to be String.
-for i in 0:10
-    dic["$(i)"] = temp[i]
+for i in nrange[1]:nrange[2]
+    mu2["$(i)"] = upper_dic[i]
+    mu1["$(i)"] = lower_dic[i]
 end
-save("./mu2_bkg_data/mu_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_0.001.jld", dic)
+mu2["bkg_scan"] = bkg_scan
+mu1["bkg_scan"] = bkg_scan
+save("../mu2_bkg_data/mu_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu2)
+save("../mu1_bkg_data/mu_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu1)
+print("Done!")
