@@ -4,13 +4,13 @@
 
 push!(LOAD_PATH, ".")
 using MildPathology # Top level packages
-using Plots, JLD
+using JLD
 println("Please wait for a while, it may take several hours...")
 bkg_upper_limit = 20
 mu_upper_limit = 50
-bkg_precision = 0.001
+bkg_precision = 0.01
 bkg_scan = 0:bkg_precision:25
-mu_list = 0:0.01:50
+mu_list = 0:0.001:50
 CL = 0.9
 nrange = (0, 10)
 mu2 = Dict{String, Array}()
@@ -23,6 +23,6 @@ for i in nrange[1]:nrange[2]
 end
 mu2["bkg_scan"] = bkg_scan
 mu1["bkg_scan"] = bkg_scan
-save("../mu2_bkg_data/mu_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu2)
-save("../mu1_bkg_data/mu_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu1)
+save("../mu_bkg_data/mu2_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu2)
+save("../mu_bkg_data/mu1_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu1)
 print("Done!")
