@@ -42,7 +42,7 @@ function findModifiedUpperLimit(n0::Int, bkg::Float64, mu2_dic, step_index)
     println("--------------------------")
     for i in 1:length(step_index)-1
         # find nearest bkg in the dictionary.
-        if bkg > bkg_step_points[i] && bkg < bkg_step_points[i+1]
+        if bkg > bkg_step_points[i] && bkg < bkg_step_points[i+1] # bkg in the abnormal part.
             println("The bkg interval is:")
             println(bkg_step_points[i], "\t", bkg_step_points[i+1])
             # if mu is in the dip reigon, modified it!
@@ -53,6 +53,10 @@ function findModifiedUpperLimit(n0::Int, bkg::Float64, mu2_dic, step_index)
             else
                 return mu2_list[index]
             end
+        elseif bkg < bkg_step_points[1] # bkg in the left region.
+            return mu2_list[index]
+        elseif bkg > last(bkg_step_points)
+            println("Warning: Need to know the next step point!!! Hint: enlarge bkg_scan region")
         end
     end
 end
@@ -62,7 +66,7 @@ function findLowerLimit(n0, bkg, mu1_dic)
     mu1_list = mu1_dic[string(n0)]
     index::Int = findIndex(bkg, bkg_scan)
     println("--------------------------")
-    println("The nearest bkg is ", bkg_scan[index], ", whose mu2 is ", mu1_list[index], ".")
+    println("The nearest bkg is ", bkg_scan[index], ", whose μ_1 is ", mu1_list[index], ".")
     println("--------------------------")
     return mu1_list[index]
 end
@@ -74,10 +78,11 @@ function findInterval(n0, bkg)
     return [mu1, mu2]
 end
 
+# Loading the init data.
 global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001.jld")
 global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001.jld")
 bkg_scan = mu2_dic["bkg_scan"]
 step_index = getStepIndex(mu2_dic["2"])
 plot(bkg_scan, mu2_dic["2"])
 scatter!(bkg_scan[step_index], mu2_dic["2"][step_index])
-# print("μ interval is:", findInterval(0, 3.0))
+print("μ interval is:", findInterval(3, 10.0))
