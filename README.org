@@ -1,1 +1,14 @@
 * Likelihood Ratio Method on rare Events Statistic.
+** Algorithm
+See in https://doi.org/10.1103/PhysRevD.57.3873. Page 5-6.
+*** Taking mild pathologies with special care.
+Due to the discreteness of Poisson distribution, we need handle two mild pathologies carefully.
+1. When background varies, the confident belt show abnormal structure.(see in variousBKG_gif folder).
+2. This abnormal structure leads to the “jump” of mu_2(b), which is different from our expection.
+We want mu2 as function of background to be non-increasing function. What we modify is ...
+** How to use the program
+1. In /src/single_core_version/init.jl, setting CL(confident level) and nrange.
+2. Run /julia init.jl/ in the terminal.
+3. Waiting until the program is done. It will generate a data file named mu1(or mu2)_bkg_...
+4. Run lookItup.jl.
+*Notice: If data file has existed, there is no need to run init.jl again.*
