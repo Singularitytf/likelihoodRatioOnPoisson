@@ -1,6 +1,4 @@
 # This module has been parallelized.
-module HighPerformenceLHR
-export constructBelt, likelihoodRatio, selectMuRegion
 
 using Distributed, SharedArrays
 
@@ -122,5 +120,3 @@ function selectMuRegion(mu_list, n0_limit_list)
     end
     return n0_upper_mu_dic
 end
-
-end # end of module

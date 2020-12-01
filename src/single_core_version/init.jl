@@ -8,7 +8,7 @@ using JLD
 println("Please wait for a while, it may take several hours...")
 bkg_upper_limit = 20
 mu_upper_limit = 50
-bkg_precision = 0.01
+bkg_precision = 0.1
 bkg_scan = 0:bkg_precision:25
 mu_list = 0:0.001:50
 CL = 0.9

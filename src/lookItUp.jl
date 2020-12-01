@@ -66,7 +66,7 @@ function findLowerLimit(n0, bkg, mu1_dic)
     mu1_list = mu1_dic[string(n0)]
     index::Int = findIndex(bkg, bkg_scan)
     println("--------------------------")
-    println("The nearest bkg is ", bkg_scan[index], ", whose μ_1 is ", mu1_list[index], ".")
+    println("The nearest bkg is ", bkg_scan[index], ", whose μ1 is ", mu1_list[index], ".")
     println("--------------------------")
     return mu1_list[index]
 end
@@ -85,4 +85,4 @@ bkg_scan = mu2_dic["bkg_scan"]
 step_index = getStepIndex(mu2_dic["2"])
 plot(bkg_scan, mu2_dic["2"])
 scatter!(bkg_scan[step_index], mu2_dic["2"][step_index])
-print("μ interval is:", findInterval(3, 10.0))
+print("μ interval is:", findInterval(0, 15.0))

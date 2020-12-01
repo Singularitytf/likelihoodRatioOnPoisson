@@ -49,7 +49,7 @@ function getSortedRatio(mu, bkg, n0_upper, check::Bool = false)
     =#
     # For convinience of checking data, we could return p(n0|mu) and p(n0|mu_best) list.
     if check == false
-        ratio_list = ones(n0_upper+1) # Since n0 counts form 0 to n0_upper.
+        ratio_list = Array{Int}(n0_upper+1) # Since n0 counts form 0 to n0_upper.
         for n0 in 0:n0_upper
             mu_best = getMuBest(n0, bkg)
             ratio_list[n0+1] = pdf(Poisson(mu + bkg), n0)/pdf(Poisson(mu_best + bkg), n0)
@@ -78,7 +78,7 @@ function selectN0(mu, bkg, index_sorted_list, cfdent_level)
     # A sub-purcess of likelihoodRatio.
     # Select upper and lower n0 for each mu with A confident level.
     sum_of_hypo::Float64 = 0.0
-    selected_n0 = []
+    selected_n0 = Array{Int}()
     n0_upper = length(index_sorted_list) - 1
     i::Int8 = 0
     while sum_of_hypo < cfdent_level
@@ -115,6 +115,7 @@ function selectMuRegion(mu_list, n0_limit_list)
     temp::Int = 0
     length_of_length::Int = length(mu_list)
     n0_upper_mu_dic = Dict{Int32, Float64}()
+    # n0_lower_mu_dic = Dict{Int32, Float64}()
     for i in 1:(length_of_length-1)
         if n0_limit_list[i+1, 1] != n0_limit_list[i, 1]
             n0_upper_mu_dic[n0_limit_list[i, 1]] = mu_list[i]
@@ -140,26 +141,4 @@ function constructBelt(bkg::Float64, mu_list, cfdent_level::Float64=0.9, n0_uppe
     return n0_limit_list
 end
 
-
-    # length_of_list = 10000 # parameter used in [S0556-2821(98)00109-X] is 10,000.
-# mu_upper_limit = 60
-# bkg = 5.0
-# cfdent_level = 0.9
-# n0_upper = 60
-
-# mu_list = range(0, mu_upper_limit, length = length_of_list)
-# n0_limit_list = ones(length_of_list, 2)
-# for i in 1:length_of_list
-#     temp = likelihoodRatio(mu_list[i], bkg, cfdent_level, n0_upper)
-#     n0_limit_list[i, :] = temp
-# end
-# for i in 100:200
-#     println(n0_limit_list[i,1], "\t",n0_limit_list[i,2], "\t",mu_list[i])
-# end
-# plot(n0_limit_list[:, 1], mu_list, "r",
-#      n0_limit_list[:, 2], mu_list, "r")
-# dict_test = selectMuRegion(mu_list, n0_limit_list)
-# for i in 0:100
-#     println(i, "\t",dict_test[i])
-# end
 end # End of module.

@@ -4,7 +4,7 @@ The algorthim is form PHYSICAL REVIEW D Unified approach to the classical statis
 
 
 module PoissonLikelihoodRatio
-export likelihoodRatio, selectMuRegion, getSortedRatio, showSortedResult, constructBelt
+export likelihoodRatio, getMU2Dict, selectMuRegion, getSortedRatio, showSortedResult, constructBelt
 using Distributions
 
 
@@ -58,13 +58,13 @@ function getSortedRatio(mu, bkg, n0_upper, check::Bool = false)
         sorted_index_rank = sortperm(ratio_list, rev = true) # Due to index start form 1, while the n0 start form 0, there exists one difference between index and n0, i.e. n0 = index - 1.
         return sorted_index_rank
     else
-        ratio_list = ones(n0_upper+1)
+        ratio_list = ones(Int, n0_upper+1) # shoule be an Integer list 
         hypo_mu_list = ones(n0_upper+1)
         hypo_mu_best_list = ones(n0_upper+1)
         for n0 in 0:n0_upper
             mu_best = getMuBest(n0, bkg)
-            hypo_mu_list[n0+1] = poisson_pdf(mu + bkg, n0)
-            hypo_mu_best_list[n0+1] = poisson_pdf(mu_best + bkg, n0)
+            hypo_mu_list[n0+1] = pdf(Poisson(mu + bkg), n0)
+            hypo_mu_best_list[n0+1] = pdf(Poisson(mu_best + bkg), n0)
             ratio_list[n0+1] = hypo_mu_list[n0+1]/hypo_mu_best_list[n0+1]
         end
         sorted_index_rank = sortperm(ratio_list, rev = true) # Due to index start form 1, while the n0 start form 0, there exists one difference between index and n0, i.e. n0 = index - 1.
@@ -107,21 +107,42 @@ function likelihoodRatio(mu::Float64, bkg::Float64, cfdent_level::Float64, n0_up
     end
 end
 
-function selectMuRegion(mu_list, n0_limit_list)
+function getMU2Dict(mu_list, n0_limit_list)
     #=
     This function gives the mu interval with dictionary structure.
     NOTICE: This function naturely select the topmost mu_2 of a fixed n_0, since it would overwrite the keys(n_0).
     =#
-    temp::Int = 0
-    length_of_length::Int = length(mu_list)
-    n0_upper_mu_dic = Dict{Int32, Float64}()
-    for i in 1:(length_of_length-1)
+    length_of_muList::Int = length(mu_list)
+    n0_upper_mu_dic = Dict{Int, Float64}()
+
+    for i in 1:(length_of_muList-1)
         if n0_limit_list[i+1, 1] != n0_limit_list[i, 1]
             n0_upper_mu_dic[n0_limit_list[i, 1]] = mu_list[i]
         end
     end
     return n0_upper_mu_dic
 end
+
+function selectMuRegion(mu_list, n0_limit_list)
+    #=
+    This function gives the mu interval with dictionary structure.
+    NOTICE: This function naturely select the topmost mu_2 of a fixed n_0, since it would overwrite the keys(n_0).
+    =#
+    length_of_muList::Int = length(mu_list)
+    n0_upper_mu_dic = Dict{Int, Float64}()
+    n0_lower_mu_dic = Dict{Int, Float64}()
+
+    for i in 1:(length_of_muList-1)
+        if n0_limit_list[i+1, 1] != n0_limit_list[i, 1]
+            n0_upper_mu_dic[n0_limit_list[i, 1]] = mu_list[i]
+        end
+        if n0_limit_list[i+1, 2] != n0_limit_list[i, 2]
+            n0_lower_mu_dic[n0_limit_list[i, 2]+1] = mu_list[i] # +1 for bottommost.
+        end
+    end
+    return n0_upper_mu_dic, n0_lower_mu_dic
+end
+
 
 function constructBelt(bkg::Float64, mu_list, cfdent_level::Float64=0.9, n0_upper::Int=100)
     #=
@@ -133,7 +154,7 @@ function constructBelt(bkg::Float64, mu_list, cfdent_level::Float64=0.9, n0_uppe
     # Scan for the whole mu parameter space.
     # mu_list = 0:0.005:mu_upper_limit
     length_of_list = length(mu_list)
-    n0_limit_list = ones(length_of_list, 2)
+    n0_limit_list = ones(Int, length_of_list, 2)
     for i in 1:length_of_list
         n0_limit_list[i, :] = likelihoodRatio(mu_list[i], bkg, cfdent_level, n0_upper)
     end
