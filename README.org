@@ -12,3 +12,6 @@ We want mu2 as function of background to be non-increasing function. What we mod
 3. Waiting until the program is done. It will generate a data file named mu1(or mu2)_bkg_...
 4. Run lookItup.jl.
 *Notice: If data file has existed, there is no need to run init.jl again.*
+** Todo
+- Update multi-core version.
+- Bug fix.
