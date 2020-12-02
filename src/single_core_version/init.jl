@@ -8,11 +8,11 @@ using JLD
 println("Please wait for a while, it may take several hours...")
 bkg_upper_limit = 20
 mu_upper_limit = 50
-bkg_precision = 0.1
+bkg_precision = 0.001
 bkg_scan = 0:bkg_precision:25
 mu_list = 0:0.001:50
 CL = 0.9
-nrange = (0, 10)
+nrange = (0, 20)
 mu2 = Dict{String, Array}()
 mu1 = Dict{String, Array}()
 upper_dic, lower_dic = getMuofBkg(bkg_scan, mu_list, CL, nrange = (0, 10))
@@ -23,6 +23,14 @@ for i in nrange[1]:nrange[2]
 end
 mu2["bkg_scan"] = bkg_scan
 mu1["bkg_scan"] = bkg_scan
-save("../mu_bkg_data/mu2_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu2)
-save("../mu_bkg_data/mu1_bkg_dict_$(mu_upper_limit)_$(bkg_upper_limit)_$(bkg_precision).jld", mu1)
+try
+    save("../mu_bkg_data/mu2_bkg_dict_$(nrange)_$(CL).jld", mu2)
+    save("../mu_bkg_data/mu1_bkg_dict_$(nrange)_$(CL).jld", mu1)
+catch e
+    if isa(e, SystemError)
+        mkdir("../mu_bkg_data/")
+        save("../mu_bkg_data/mu2_bkg_dict_$(nrange)_$(CL).jld", mu2)
+        save("../mu_bkg_data/mu1_bkg_dict_$(nrange)_$(CL).jld", mu1)
+    end
+end
 print("Done!")
