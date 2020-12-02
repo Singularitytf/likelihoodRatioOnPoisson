@@ -61,6 +61,17 @@ function findModifiedUpperLimit(n0::Int, bkg::Float64, mu2_dic, step_index)
     end
 end
 
+function findUpperLimit(n0, bkg, mu2_dic)
+    bkg_scan = mu2_dic["bkg_scan"]
+    mu2_list = mu2_dic[string(n0)]
+    index::Int = findIndex(bkg, bkg_scan)
+    println("--------------------------")
+    println("The nearest bkg is ", bkg_scan[index], ", whose μ2 is ", mu2_list[index], ".")
+    println("--------------------------")
+    return mu2_list[index]
+end
+
+
 function findLowerLimit(n0, bkg, mu1_dic)
     bkg_scan = mu1_dic["bkg_scan"]
     mu1_list = mu1_dic[string(n0)]
@@ -73,16 +84,26 @@ end
 
 function findInterval(n0, bkg)
     step_index = getStepIndex(mu2_dic[string(n0)])
-    mu2 = findModifiedUpperLimit(n0, bkg, mu2_dic, step_index)
-    mu1 = findLowerLimit(n0, bkg, mu1_dic)
+    if isa(step_index, Array{Any,1})
+        mu2 = findUpperLimit(n0, bkg, mu2_dic)
+        mu1 = findLowerLimit(n0, bkg, mu1_dic)
+    else
+        mu2 = findModifiedUpperLimit(n0, bkg, mu2_dic, step_index)
+        mu1 = findLowerLimit(n0, bkg, mu1_dic)
+    end
     return [mu1, mu2]
 end
 
+function loadData(cfdent_level)
+    global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001_$(cfdent_level).jld")
+    global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001_$(cfdent_level).jld")
+end
+
 # Loading the init data.
-global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001.jld")
-global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001.jld")
+global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001_0.95.jld")
+global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001_0.95.jld")
 bkg_scan = mu2_dic["bkg_scan"]
-step_index = getStepIndex(mu2_dic["2"])
-plot(bkg_scan, mu2_dic["2"])
-scatter!(bkg_scan[step_index], mu2_dic["2"][step_index])
-print("μ interval is:", findInterval(0, 15.0))
+step_index = getStepIndex(mu2_dic["20"])
+plot(bkg_scan, mu2_dic["20"])
+scatter!(bkg_scan[step_index], mu2_dic["20"][step_index])
+print("μ interval is:", findInterval(15, 11.0))
