@@ -84,7 +84,7 @@ end
 
 function findInterval(n0, bkg)
     step_index = getStepIndex(mu2_dic[string(n0)])
-    if isa(step_index, Array{Any,1})
+    if length(step_index) == 0 # find whether it have pathology or not.
         mu2 = findUpperLimit(n0, bkg, mu2_dic)
         mu1 = findLowerLimit(n0, bkg, mu1_dic)
     else
@@ -100,10 +100,10 @@ function loadData(cfdent_level)
 end
 
 # Loading the init data.
-global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001_0.95.jld")
-global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001_0.95.jld")
+global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001.jld")
+global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001.jld")
 bkg_scan = mu2_dic["bkg_scan"]
-step_index = getStepIndex(mu2_dic["20"])
-plot(bkg_scan, mu2_dic["20"])
-scatter!(bkg_scan[step_index], mu2_dic["20"][step_index])
-print("μ interval is:", findInterval(15, 11.0))
+step_index = getStepIndex(mu2_dic["0"])
+plot(bkg_scan, mu2_dic["0"])
+scatter!(bkg_scan[step_index], mu2_dic["0"][step_index])
+print("μ interval is:", findInterval(0, 3.0))
