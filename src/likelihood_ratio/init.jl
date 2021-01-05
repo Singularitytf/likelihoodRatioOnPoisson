@@ -15,7 +15,7 @@ CL = 0.9
 nrange = (0, 20)
 mu2 = Dict{String, Array}()
 mu1 = Dict{String, Array}()
-upper_dic, lower_dic = getMuofBkg(bkg_scan, mu_list, CL, nrange = (0, 10))
+upper_dic, lower_dic = getMuofBkg(bkg_scan, mu_list, CL, nrange = nrange)
 # re-assign key for storing!! Since JLD need keys to be String.
 for i in nrange[1]:nrange[2]
     mu2["$(i)"] = upper_dic[i]
@@ -24,13 +24,13 @@ end
 mu2["bkg_scan"] = bkg_scan
 mu1["bkg_scan"] = bkg_scan
 try
-    save("../mu_bkg_data/mu2_bkg_dict_$(nrange)_$(CL).jld", mu2)
-    save("../mu_bkg_data/mu1_bkg_dict_$(nrange)_$(CL).jld", mu1)
+    save("../mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
+    save("../mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
 catch e
-    if isa(e, SystemError)
+    if isa(e, LoadError)
         mkdir("../mu_bkg_data/")
-        save("../mu_bkg_data/mu2_bkg_dict_$(nrange)_$(CL).jld", mu2)
-        save("../mu_bkg_data/mu1_bkg_dict_$(nrange)_$(CL).jld", mu1)
+        save("../mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
+        save("../mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
     end
 end
 print("Done!")
