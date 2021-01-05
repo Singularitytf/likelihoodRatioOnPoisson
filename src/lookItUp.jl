@@ -1,5 +1,7 @@
+
+module lookItUp
+export loadData, findInterval
 using JLD
-using Plots
 
 function getStepIndex(list)
     # input an dict mapping n0 to mu_2(b). output its step's index
@@ -37,18 +39,18 @@ function findModifiedUpperLimit(n0::Int, bkg::Float64, mu2_dic, step_index)
     bkg_step_points = bkg_scan[step_index]
     mu2_step_points = mu2_list[step_index]
     index::Int = findIndex(bkg, bkg_scan)
-    println("--------------------------")
-    println("The nearest bkg is ", bkg_scan[index], ", whose mu2 is ", mu2_list[index], ".")
-    println("--------------------------")
+    # println("--------------------------")
+    # println("The nearest bkg is ", bkg_scan[index], ", whose mu2 is ", mu2_list[index], ".")
+    # println("--------------------------")
     for i in 1:length(step_index)-1
         # find nearest bkg in the dictionary.
         if bkg > bkg_step_points[i] && bkg < bkg_step_points[i+1] # bkg in the abnormal part.
-            println("The bkg interval is:")
-            println(bkg_step_points[i], "\t", bkg_step_points[i+1])
+            # println("The bkg interval is:")
+            # println(bkg_step_points[i], "\t", bkg_step_points[i+1])
             # if mu is in the dip reigon, modified it!
             if mu2_list[index] <= mu2_step_points[i+1]
-                println("The mu interval is:")
-                println(mu2_list[index], "\t", mu2_step_points[i+1])
+                # println("The mu interval is:")
+                # println(mu2_list[index], "\t", mu2_step_points[i+1])
                 return mu2_step_points[i+1]
             else
                 return mu2_list[index]
@@ -65,9 +67,9 @@ function findUpperLimit(n0, bkg, mu2_dic)
     bkg_scan = mu2_dic["bkg_scan"]
     mu2_list = mu2_dic[string(n0)]
     index::Int = findIndex(bkg, bkg_scan)
-    println("--------------------------")
-    println("The nearest bkg is ", bkg_scan[index], ", whose μ2 is ", mu2_list[index], ".")
-    println("--------------------------")
+    # println("--------------------------")
+    # println("The nearest bkg is ", bkg_scan[index], ", whose μ2 is ", mu2_list[index], ".")
+    # println("--------------------------")
     return mu2_list[index]
 end
 
@@ -76,14 +78,14 @@ function findLowerLimit(n0, bkg, mu1_dic)
     bkg_scan = mu1_dic["bkg_scan"]
     mu1_list = mu1_dic[string(n0)]
     index::Int = findIndex(bkg, bkg_scan)
-    println("--------------------------")
-    println("The nearest bkg is ", bkg_scan[index], ", whose μ1 is ", mu1_list[index], ".")
-    println("--------------------------")
+    # println("--------------------------")
+    # println("The nearest bkg is ", bkg_scan[index], ", whose μ1 is ", mu1_list[index], ".")
+    # println("--------------------------")
     return mu1_list[index]
 end
 
 function findInterval(n0, bkg)
-    step_index = getStepIndex(mu2_dic[string(n0)])
+    step_index = getStepIndex(mu2_dic["$(n0)"])
     if length(step_index) == 0 # find whether it have pathology or not.
         mu2 = findUpperLimit(n0, bkg, mu2_dic)
         mu1 = findLowerLimit(n0, bkg, mu1_dic)
@@ -94,16 +96,10 @@ function findInterval(n0, bkg)
     return [mu1, mu2]
 end
 
-function loadData(cfdent_level)
-    global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001_$(cfdent_level).jld")
-    global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001_$(cfdent_level).jld")
+function loadData(CL, nrange = (0,20))
+    global mu1_dic = load("mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld")
+    global mu2_dic = load("mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld")
 end
 
-# Loading the init data.
-global mu1_dic = load("mu_bkg_data/mu1_bkg_dict_50_20_0.001.jld")
-global mu2_dic = load("mu_bkg_data/mu2_bkg_dict_50_20_0.001.jld")
-bkg_scan = mu2_dic["bkg_scan"]
-step_index = getStepIndex(mu2_dic["0"])
-plot(bkg_scan, mu2_dic["0"])
-scatter!(bkg_scan[step_index], mu2_dic["0"][step_index])
-print("μ interval is:", findInterval(0, 3.0))
+
+end # The end of module

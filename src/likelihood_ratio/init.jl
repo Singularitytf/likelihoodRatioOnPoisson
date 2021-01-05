@@ -24,13 +24,13 @@ end
 mu2["bkg_scan"] = bkg_scan
 mu1["bkg_scan"] = bkg_scan
 try
-    save("../mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
-    save("../mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
+    save("../likelihood_mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
+    save("../likelihood_mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
 catch e
     if isa(e, LoadError)
-        mkdir("../mu_bkg_data/")
-        save("../mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
-        save("../mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
+        mkdir("../likelihood_mu_bkg_data/")
+        save("../likelihood_mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
+        save("../likelihood_mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
     end
 end
 print("Done!")
