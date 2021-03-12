@@ -97,8 +97,8 @@ function findInterval(n0, bkg)
 end
 
 function loadData(CL, nrange = (0,20))
-    global mu1_dic = load("mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld")
-    global mu2_dic = load("mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld")
+    global mu1_dic = load("likelihood_mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld")
+    global mu2_dic = load("likelihood_mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld")
 end
 
 

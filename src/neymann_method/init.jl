@@ -20,11 +20,11 @@ end
 mu2["bkg_scan"] = bkg_scan
 mu1["bkg_scan"] = bkg_scan
 try
-    mkdir("../neymann_mu_bkg_data/")
-    save("../neymann_mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
-    save("../neymann_mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
+    mkdir("../NMdata/")
+    save("../NMdata/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
+    save("../NMdata/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
 catch e
-    save("../neymann_mu_bkg_data/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
-    save("../neymann_mu_bkg_data/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
+    save("../../NMdata/mu2_$(nrange[1])_$(nrange[2])_$(CL).jld", mu2)
+    save("../../NMdata/mu1_$(nrange[1])_$(nrange[2])_$(CL).jld", mu1)
 end
 print("Done!")
